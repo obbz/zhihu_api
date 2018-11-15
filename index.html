@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="utf-8">
+		<title>Hello MUI</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1,maximum-scale=1, user-scalable=no">
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="apple-mobile-web-app-status-bar-style" content="black">
+		<link rel="stylesheet" href="css/mui.min.css">
+		<style type="text/css">
+			#list {
+				/*避免导航边框和列表背景边框重叠，看起来像两条边框似得；*/
+				margin-top: -1px;
+			}
+
+			.mui-icon {
+				color: white;
+			}
+
+			.mui-action-back {
+				color: white;
+			}
+
+			.mui-bar {
+				background-color: #2187E7;
+			}
+
+			.mui-title {
+				color: white;
+				margin-left: 50px;
+			}
+		</style>
+	</head>
+
+	<body>
+		<div id="offCanvasWrapper" class="mui-off-canvas-wrap mui-draggable">
+			<!--侧滑菜单部分-->
+			<aside id="offCanvasSide" class="mui-off-canvas-left">
+				<div id="offCanvasSideScroll" class="mui-scroll-wrapper">
+					<!-- 这和整个部分就是侧边栏的 -->
+					<div class="mui-scroll">
+						<!-- 这里是侧边的 -->
+						<header class="mui-bar mui-bar-nav">
+							<a href="#offCanvasSide" class="mui-icon mui-action-menu mui-icon-contact"></a>
+							<a class="mui-icon">请登录</a><br>
+							<a class="mui-icon mui-action-menu mui-icon mui-icon-star"></a>
+						</header>
+						<ul class="mui-table-view mui-table-view-chevron mui-table-view-inverted">
+							<li class="mui-table-view-cell">
+								<a class="mui-navigate-right">
+									Item 1
+								</a>
+							</li>
+						</ul>
+					</div>
+				</div>
+			</aside>
+			<!--主界面部分-->
+			<div class="mui-inner-wrap">
+
+				<div id="offCanvasContentScroll" class="mui-content mui-scroll-wrapper"  >
+					<div class="mui-scroll" >
+
+						<header class="mui-bar mui-bar-nav">
+							<a href="#offCanvasSide" class="mui-icon mui-action-menu mui-icon-bars mui-pull-left"></a>
+							<a class="mui-action-back mui-btn mui-btn-link mui-pull-right">关闭</a>
+							<h1 class="mui-title">首页</h1>
+						</header>
+
+						<!-- 新闻内容 -->
+						<div class="mui-slider">
+							<!-- 图片轮播 -->
+							<div class="mui-slider-group mui-slider-loop" id="imageCarousel"></div>
+							<!-- 图片上的那个点 -->
+							<div class="mui-slider-indicator" id="btndot"></div>
+						</div>
+						<div class="title">
+							今日新闻
+						</div>
+						 <div id="xinwen"></div>
+
+					</div>
+				</div>
+				<!-- off-canvas backdrop -->
+				<div class="mui-off-canvas-backdrop"></div>
+			</div>
+		</div>
+		<script src="js/mui.min.js"></script>
+		<script type="text/javascript" charset="utf-8">
+			mui.init();
+			//侧滑容器父节点
+			var offCanvasWrapper = mui('#offCanvasWrapper');
+			//主界面容器
+			var offCanvasInner = offCanvasWrapper[0].querySelector('.mui-inner-wrap');
+			//侧滑容器的class列表，增加.mui-slide-in即可实现菜单移动、主界面不动的效果；
+			var classList = offCanvasWrapper[0].classList;
+			classList.add('mui-slide-in');
+
+			mui.init({
+				swipeBack: true //启用右滑关闭功能
+			});
+			var slider = mui("#slider");
+
+			slider.slider({
+				interval: 1000
+			});
+			
+			//这个是内容滑动
+			mui("#offCanvasContentScroll").scroll();
+		</script>
+		<!-- 轮播效果 -->
+		<script>
+			var gallery = mui('.mui-slider');
+			
+			
+		</script>
+		<!-- mui.ajax请求数据 -->
+		<script>
+			mui.ajax({
+				// dataType:'json',//服务器返回json格式数据
+				url: 'https://news-at.zhihu.com/api/4/news/latest',
+				type: 'get',
+				success: function(data) {
+					// 额外增加的一个节点(循环轮播：第一个节点是最后一张轮播)
+					var html = "<div class='mui-slider-item mui-slider-item-duplicate'>"
+					html += "<a href='" + data.top_stories[data.top_stories.length - 1].id + "'>";
+					html += "<img src='" + data.top_stories[data.top_stories.length - 1].image + "'>";
+					html += "<p class='mui-slider-title'>" + data.top_stories[data.top_stories.length - 1].title + "</p>";
+					html += "</a>";
+					html += "</div>";
+
+
+							
+					var btndot = "";
+					// 开始轮播图片
+					for (var i = 0; i < data.top_stories.length; i++) {
+						html += "<div class='mui-slider-item'>";
+						html += "<a href='" + data.top_stories[i].id + "'>";
+						html += "<img src='" + data.top_stories[i].image + "'>";
+						html += "<p class='mui-slider-title'>" + data.top_stories[i].title + "</p>";
+						html += "</a>";
+						html += "</div>";
+
+						btndot += "<div class='mui-indicator'></div>";
+					}
+					// 额外增加的一个节点(循环轮播：最后一个节点是第一张轮播)
+
+					html += "<div class='mui-slider-item mui-slider-item-duplicate'>"
+					html += "<a href='" + data.top_stories[0].id + "'>";
+					html += "<img src='" + data.top_stories[0].image + "'>";
+					html += "<p class='mui-slider-title'>" + data.top_stories[0].title + "</p>";
+					html += "</a>";
+					html += "</div>";
+					document.getElementById("imageCarousel").innerHTML = html;
+					document.getElementById("btndot").innerHTML = btndot;
+
+						 
+					var html2 = "";
+					for (var i = 0; i < data.stories.length; i++) {
+						html2 += "<div class='mui-card' style='margin-bottom: 10px;'>";
+						html2 += "<ul class='mui-table-view'>";
+						html2 += "<li class='mui-table-view-cell mui-media'>";
+						html2 += "<a href='" + data.stories[i].id + "'>";
+						html2 += "<img class='mui-media-object mui-pull-right' src='" + data.stories[i].images + "'>";
+						html2 += "<div class='mui-media-body'>";
+						html2 += "<p class='mui-ellipsis'>" + data.stories[i].title + "</p>";
+						html2 += "</div></a></li></ul></div>";
+					}
+					
+					document.getElementById("xinwen").innerHTML=html2;
+
+					gallery.slider({
+						interval: 1000 //自动轮播周期，若为0则不自动播放，默认为0；
+					});
+				},
+				error: function(e) {
+					console.log(e);
+				}
+			});
+		</script>
+	</body>
+
+</html>
